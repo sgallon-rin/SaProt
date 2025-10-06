@@ -90,47 +90,29 @@ def locate_structure_file(pdb_dir: Path, chain_id: str, extensions: List[str]) -
 def extract_combined_sequence(
     foldseek_bin: Path,
     pdb_path: Path,
-    chain: str,
     process_id: int,
     foldseek_verbose: bool,
 ) -> str:
-    target_chain = chain.upper() if chain else "A"
-
     seq_dict = get_struc_seq(
         foldseek=str(foldseek_bin),
         path=str(pdb_path),
-        chains=[target_chain],
+        chains=None,
         process_id=process_id,
         plddt_mask=False,
         foldseek_verbose=foldseek_verbose,
     )
 
-    if target_chain not in seq_dict:
-        # Retry without restricting to a specific chain so we can inspect all outputs.
-        seq_dict = get_struc_seq(
-            foldseek=str(foldseek_bin),
-            path=str(pdb_path),
-            chains=None,
-            process_id=process_id,
-            plddt_mask=False,
-            foldseek_verbose=foldseek_verbose,
-        )
-
     if not seq_dict:
-        raise KeyError(
-            f"Foldseek returned no chains for {pdb_path}."
+        raise KeyError(f"Foldseek returned no chains for {pdb_path}.")
+
+    if len(seq_dict) > 1:
+        first_chain = next(iter(seq_dict))
+        print(
+            f"[WARN] {pdb_path.name} contains {len(seq_dict)} chains. "
+            f"Using chain '{first_chain}'."
         )
 
-    if target_chain in seq_dict:
-        return seq_dict[target_chain][2]
-
-    # Fall back to the first chain and warn so users can review later.
-    fallback_chain, value = next(iter(seq_dict.items()))
-    print(
-        f"[WARN] Chain '{target_chain}' not found in {pdb_path.name}, "
-        f"using chain '{fallback_chain}' instead."
-    )
-    return value[2]
+    return next(iter(seq_dict.values()))[2]
 
 
 def build_split_jsonl(
@@ -151,11 +133,9 @@ def build_split_jsonl(
                 raise KeyError(f"Label not found for chain {chain_id} in chain_functions file")
 
             pdb_path = locate_structure_file(pdb_dir, chain_id, extensions)
-            base_id, _, chain = chain_id.partition(".")
             combined_seq = extract_combined_sequence(
                 foldseek_bin=foldseek_bin,
                 pdb_path=pdb_path,
-                chain=chain or "A",
                 process_id=os.getpid(),
                 foldseek_verbose=foldseek_verbose,
             )
@@ -182,7 +162,7 @@ def main() -> None:
     parser.add_argument("--splits-dir", required=True, type=Path, help="Directory containing split txt files")
     parser.add_argument("--train", default="training.txt", help="Training split filename")
     parser.add_argument("--valid", default="validation.txt", help="Validation split filename")
-    parser.add_argument("--test", default="test.txt", help="Test split filename")
+    parser.add_argument("--test", default="testing.txt", help="Test split filename")
     parser.add_argument("--label-file", required=True, type=Path, help="chain_functions.txt path")
     parser.add_argument("--out-root", required=True, type=Path, help="Output directory root for LMDB shards")
     parser.add_argument(
