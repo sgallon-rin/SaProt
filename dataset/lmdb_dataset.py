@@ -44,7 +44,8 @@ class LMDBDataset(pl.LightningDataModule):
             self._close_lmdb()
             
         # open lmdb
-        self.env = lmdb.open(path, lock=False, map_size=_10TB)
+        #self.env = lmdb.open(path, lock=False, map_size=_10TB)
+        self.env = lmdb.open(path, lock=False, map_size=(1 << 30))  # 1 GiB
         self.operator = self.env.begin()
     
     def _close_lmdb(self):
