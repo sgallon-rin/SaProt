@@ -48,7 +48,7 @@ dataset:
 #    Arguments to initialize the specific class
   kwargs:
     tokenizer: westlake-repl/SaProt_35M_AF2
-    plddt_threshold: 70.
+    #plddt_threshold: 70.
 
 
 #  Arguments to initialize Pytorch Lightning Trainer
