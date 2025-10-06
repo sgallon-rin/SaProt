@@ -94,23 +94,43 @@ def extract_combined_sequence(
     process_id: int,
     foldseek_verbose: bool,
 ) -> str:
+    target_chain = chain.upper() if chain else "A"
+
     seq_dict = get_struc_seq(
         foldseek=str(foldseek_bin),
         path=str(pdb_path),
-        chains=[chain.upper()],
+        chains=[target_chain],
         process_id=process_id,
         plddt_mask=False,
         foldseek_verbose=foldseek_verbose,
     )
 
-    if chain.upper() not in seq_dict:
-        available = ", ".join(seq_dict.keys()) or "<none>"
-        raise KeyError(
-            f"Chain '{chain}' not found in Foldseek output for {pdb_path}. "
-            f"Available chains: {available}"
+    if target_chain not in seq_dict:
+        # Retry without restricting to a specific chain so we can inspect all outputs.
+        seq_dict = get_struc_seq(
+            foldseek=str(foldseek_bin),
+            path=str(pdb_path),
+            chains=None,
+            process_id=process_id,
+            plddt_mask=False,
+            foldseek_verbose=foldseek_verbose,
         )
 
-    return seq_dict[chain.upper()][2]
+    if not seq_dict:
+        raise KeyError(
+            f"Foldseek returned no chains for {pdb_path}."
+        )
+
+    if target_chain in seq_dict:
+        return seq_dict[target_chain][2]
+
+    # Fall back to the first chain and warn so users can review later.
+    fallback_chain, value = next(iter(seq_dict.items()))
+    print(
+        f"[WARN] Chain '{target_chain}' not found in {pdb_path.name}, "
+        f"using chain '{fallback_chain}' instead."
+    )
+    return value[2]
 
 
 def build_split_jsonl(
@@ -231,4 +251,3 @@ def main() -> None:
 
 if __name__ == "__main__":
     main()
-
