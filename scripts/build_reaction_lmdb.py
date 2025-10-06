@@ -6,6 +6,9 @@ each line contains a PDB id and chain in the form ``4xi6.A``. The label for
 each chain is stored separately in ``chain_functions.txt`` with lines like
 ``4fae.B,247``. This script converts those resources into LMDB shards that
 the SaProt classification datamodule can consume.
+
+$ python scripts/build_reaction_lmdb.py   --foldseek bin/foldseek   --pdb-dir /raid_elmo/home/lr/shenjl/wangyi/protein-pocket/data_fixed/ProtFunct   --splits-dir /raid_elmo/home/lr/wangyi/Protein/ProtFunct   --label-file /raid_elmo/home/lr/wangyi/Protein/ProtFunct/chain_functions.txt   --out-root LMDB/Reaction   --overwrite
+Collected 384 unique labels.
 """
 
 from __future__ import annotations
