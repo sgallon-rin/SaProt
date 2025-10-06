@@ -26,7 +26,8 @@ def dump_lmdb(data_dict, lmdb_dir, verbose=True):
 	os.makedirs(lmdb_dir, exist_ok=True)
 
 	# open lmdb
-	env = lmdb.open(lmdb_dir, map_size=_10TB)
+	#env = lmdb.open(lmdb_dir, map_size=_10TB)
+	env = lmdb.open(lmdb_dir, map_size=_1GB)
 
 	with env.begin(write=True) as operator:
 		if verbose:
@@ -45,7 +46,8 @@ def jsonl2lmdb(jsonl_path, lmdb_dir):
 	os.makedirs(lmdb_dir, exist_ok=True)
 
 	# open lmdb
-	env = lmdb.open(lmdb_dir, map_size=_10TB)
+	#env = lmdb.open(lmdb_dir, map_size=_10TB)
+	env = lmdb.open(lmdb_dir, map_size=_1GB)
 
 	with env.begin(write=True) as operator:
 		with TimeCounter("Loading data..."):
