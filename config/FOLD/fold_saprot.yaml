@@ -19,7 +19,7 @@ model:
 #    Arguments to initialize the specific class
     config_path: westlake-repl/SaProt_35M_AF2
     load_pretrained: True
-    num_labels: 10
+    num_labels: 1615
 
 #    Arguments to initialize the basic class AbstractModel
   lr_scheduler_kwargs:
@@ -44,11 +44,11 @@ dataset:
 
   train_lmdb: LMDB/FOLD/foldseek/training
   valid_lmdb: LMDB/FOLD/foldseek/validation
-  test_lmdb: LMDB/DeepLoc/cls10/foldseek/test_fold
+  test_lmdb: LMDB/FOLD/foldseek/test_fold
 #    Arguments to initialize the specific class
   kwargs:
     tokenizer: westlake-repl/SaProt_35M_AF2
-    plddt_threshold: 70.
+    #plddt_threshold: 70.
 
 
 #  Arguments to initialize Pytorch Lightning Trainer
