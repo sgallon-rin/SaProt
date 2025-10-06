@@ -9,7 +9,7 @@ setting:
     WORLD_SIZE: 1
     NODE_RANK: 0
   wandb_config:
-    project: DeepLoc_cls10
+    project: FOLD_family
     name: SaProt_35M_AF2
 
 model:
@@ -32,7 +32,7 @@ model:
     betas: [0.9, 0.98]
     weight_decay: 0.01
 
-  save_path: weights/FOLD/fold/SaProt_650M_AF2.pt
+  save_path: weights/FOLD/family/SaProt_650M_AF2.pt
 
 
 dataset:
