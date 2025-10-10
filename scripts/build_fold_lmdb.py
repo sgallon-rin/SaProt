@@ -33,8 +33,15 @@ from utils.foldseek_util import get_struc_seq
 from utils.generate_lmdb import jsonl2lmdb
 
 
-def parse_split_file(path: Path, label_column: int) -> List[Tuple[str, str]]:
-    """Parse a SCOP split file and return (domain_id, label_name) pairs."""
+def parse_split_file(path: Path, label_column: int | None) -> List[Tuple[str, str]]:
+    """Parse a SCOP split file and return (domain_id, label_name) pairs.
+
+    Args:
+        path: Split file path.
+        label_column: Zero-based column index to use as label. Supports
+            negative indices (e.g. -1 for last column). If None, defaults to
+            the last column.
+    """
     pairs: List[Tuple[str, str]] = []
     with path.open("r", encoding="utf-8") as handle:
         for line in handle:
@@ -43,14 +50,16 @@ def parse_split_file(path: Path, label_column: int) -> List[Tuple[str, str]]:
                 continue
 
             fields = line.split()
-            if label_column >= len(fields):
-                raise ValueError(
-                    f"Line '{line}' in {path} has only {len(fields)} columns; "
-                    f"label_column={label_column} is out of range."
-                )
+            if label_column is None:
+                label_idx = len(fields) - 1
+            else:
+                label_idx = label_column if label_column >= 0 else len(fields) + label_column
+
+            if label_idx < 0 or label_idx >= len(fields):
+                label_idx = len(fields) - 1
 
             domain_id = fields[0]
-            label_name = fields[label_column]
+            label_name = fields[label_idx]
             pairs.append((domain_id, label_name))
 
     return pairs
@@ -160,8 +169,8 @@ def main() -> None:
     parser.add_argument(
         "--label-column",
         type=int,
-        default=1,
-        help="Zero-based index of the column to use as the label (default: 1)",
+        default=-1,
+        help="Zero-based index of the column to use as the label (supports negative indices; default: last column)",
     )
     parser.add_argument("--out-root", required=True, type=Path, help="Output directory root for LMDB shards")
     parser.add_argument("--keep-jsonl", action="store_true", help="Keep intermediate jsonl files")
