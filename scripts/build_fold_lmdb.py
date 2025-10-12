@@ -15,6 +15,7 @@ from __future__ import annotations
 
 import argparse
 import json
+import re
 import shutil
 from pathlib import Path
 from typing import Dict, Iterable, List, Tuple
@@ -60,6 +61,21 @@ def collect_labels(split_to_pairs: Dict[str, List[Tuple[str, str]]]) -> Dict[str
     """Build a deterministic mapping from label string to numeric id."""
     labels = sorted({label for pairs in split_to_pairs.values() for _, label in pairs})
     return {label: idx for idx, label in enumerate(labels)}
+
+
+def inspect_label_format(labels: Iterable[str]) -> None:
+    """Print whether labels follow the pattern <letters>.<digits> (e.g., a.1)."""
+    pattern = re.compile(r"^[A-Za-z]+\.[0-9]+$")
+    mismatched = [label for label in labels if not pattern.match(label)]
+
+    if mismatched:
+        preview = ", ".join(mismatched[:5])
+        print(
+            f"[WARN] {len(mismatched)} labels do not match <letters>.<digits>. "
+            f"Examples: {preview}"
+        )
+    else:
+        print("[OK] All labels match the expected pattern <letters>.<digits> (e.g., a.1).")
 
 
 def domain_to_chain_hint(domain_id: str) -> str | None:
@@ -169,15 +185,25 @@ def main() -> None:
     parser.add_argument("--foldseek-verbose", action="store_true", help="Print Foldseek output")
     args = parser.parse_args()
 
+    per_split_label_col = {
+        "training.txt": 1,
+        "validation.txt": 1,
+        "test_family.txt": 1,
+        "test_fold.txt": 2,
+        "test_superfamily.txt": 2,
+    }
+
     split_pairs: Dict[str, List[Tuple[str, str]]] = {}
     for split_name in args.splits:
         split_path = args.splits_dir / split_name
         if not split_path.exists():
             raise FileNotFoundError(f"Split file not found: {split_path}")
-        split_pairs[split_name] = parse_split_file(split_path, args.label_column)
+        label_col = per_split_label_col.get(split_name, args.label_column)
+        split_pairs[split_name] = parse_split_file(split_path, label_col)
 
     label_to_idx = collect_labels(split_pairs)
     print(f"Collected {len(label_to_idx)} unique labels.")
+    inspect_label_format(label_to_idx.keys())
 
     for split_name, pairs in split_pairs.items():
         jsonl_path = args.out_root / "jsonl" / f"{split_name}.jsonl"
