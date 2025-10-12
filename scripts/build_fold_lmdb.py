@@ -8,7 +8,7 @@ This script reads the SCOP split files (e.g. training.txt, validation.txt,
  SaProt finetuning pipeline.
 
 $ python scripts/build_fold_lmdb.py   --foldseek bin/foldseek   --pdb-dir /raid_elmo/home/lr/shenjl/wangyi/protein-pocket/data_fixed/HomologyTAPE   --splits-dir /raid_elmo/home/lr/wangyi/Protein/HomologyTAPE   --label-column 1   --out-root LMDB/FOLD   --overwrite
-Collected 1615 unique labels.
+Collected 1195 unique labels.
 """
 
 from __future__ import annotations

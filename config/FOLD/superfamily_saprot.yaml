@@ -19,7 +19,7 @@ model:
 #    Arguments to initialize the specific class
     config_path: westlake-repl/SaProt_35M_AF2
     load_pretrained: True
-    num_labels: 1615
+    num_labels: 1195
 
 #    Arguments to initialize the basic class AbstractModel
   lr_scheduler_kwargs:
