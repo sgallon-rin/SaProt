@@ -2,4 +2,8 @@
 .DS_Store
 __pycache__/
 .vscode/
-wandb/
+wandb
+LMDB
+bin
+weights
+
